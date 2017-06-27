@@ -23,22 +23,29 @@ OBJ = astrolog.o data.o data2.o general.o io.o\
  intrpret.o intrpalt.o\
  swe_call.o swejpl.o swemplan.o sweph.o\
  swedate.o swemmoon.o swephlib.o\
- xdata.o xgeneral.o xdevice.o xcharts0.o xcharts1.o xcharts2.o xscreen.o
+ xdata.o xgeneral.o xdevice.o xcharts0.o xcharts1.o xcharts2.o xscreen.o test.o
 # If you don't have X windows, delete the "-lX11" part from the line below:
 # LIBS = -lm -lX11
-# with Debian Linux and X windows worked 
+# with Debian Linux and X windows worked
 # LIBS = -lm -L/usr/X11R6/lib -lX11
 LIBS= -lm
 #
-CFLAGS = -O -DHPUX_SOURCE
+CFLAGS = -g -DHPUX_SOURCE -DNOMAIN
 #
 # CFLAGS from 5.41 original sources
 # CFLAGS = -g -Aa -DHPUX_SOURCE
 #
-# Planetery ephemeris are built into code. To drop them and use external file, 
+# Planetery ephemeris are built into code. To drop them and use external file,
 # use additional flag -DPAIR_SWEPH
 #
-astrolog:: $(OBJ)
-	cc -o $(NAME) $(OBJ) $(LIBS)
-	strip $(NAME)
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	cc $(CFLAGS) $(LIBS) -o $(NAME) $(OBJ)
+
+clean:
+	rm -f $(OBJ) $(NAME)
 #
+
+old: clean
+	make -f Makefile
