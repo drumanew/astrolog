@@ -27,8 +27,8 @@
 ** calculation routines in the library SWISS EPHEMERIS and are programmed and
 ** copyright 1998 by Astrodienst AG.
 ** The use of that source code is subject to
-** the Swiss Ephemeris Public License, available at 
-** http://www.astro.ch/swisseph. This copyright notice must not be 
+** the Swiss Ephemeris Public License, available at
+** http://www.astro.ch/swisseph. This copyright notice must not be
 ** changed or removed by any user of this program.
 **
 ** Initial programming 8/28,30, 9/10,13,16,20,23, 10/3,6,7, 11/7,10,21/1991.
@@ -429,6 +429,8 @@ int tc;
 void PrintSz(sz)
 CONST byte *sz;
 {
+  if (is.S == NULL) return;
+
   byte szInput[cchSzDef], *pch;
 #ifndef WIN
   int fT;
