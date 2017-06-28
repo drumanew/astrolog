@@ -44,12 +44,24 @@ CFLAGS_DYNAMIC = $(CFLAGS_STATIC) -fPIC
 
 DESTDIR := ~/dev/$(LIB_NAME)
 
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+LIB_NAME_OPT = -soname
+else ifeq ($(UNAME_S),Darwin)
+LIB_NAME_OPT = -install_name
+else
+$(error Platform not supported)
+endif
+
+
+
 all: lib
 
 lib: $(LIB_FILE_DYNAMIC) $(LIB_FILE_STATIC)
 
 $(LIB_FILE_DYNAMIC): $(LIB_OBJ_DYNAMIC)
-	$(CC) $(LIBS) -shared -Wl,-soname,$(LIB_FILE_DYNAMIC) -o $(LIB_FILE_DYNAMIC) $(LIB_OBJ_DYNAMIC)
+	$(CC) $(LIBS) -shared -Wl,$(LIB_NAME_OPT),$(LIB_FILE_DYNAMIC) -o $(LIB_FILE_DYNAMIC) $(LIB_OBJ_DYNAMIC)
 
 $(LIB_FILE_STATIC): $(LIB_OBJ_STATIC)
 	ar rcs $(LIB_FILE_STATIC) $(LIB_OBJ_STATIC)
