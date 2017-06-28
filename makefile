@@ -17,35 +17,58 @@
 # edited, is compile each source file, and link them together with the math
 # library, and if applicable, the main X library.
 #
-NAME = astrolog
-OBJ = astrolog.o data.o data2.o general.o io.o\
- calc.o matrix.o charts0.o charts1.o charts2.o charts3.o\
- intrpret.o intrpalt.o\
- swe_call.o swejpl.o swemplan.o sweph.o\
- swedate.o swemmoon.o swephlib.o\
- xdata.o xgeneral.o xdevice.o xcharts0.o xcharts1.o xcharts2.o xscreen.o test.o
-# If you don't have X windows, delete the "-lX11" part from the line below:
-# LIBS = -lm -lX11
-# with Debian Linux and X windows worked
-# LIBS = -lm -L/usr/X11R6/lib -lX11
-LIBS= -lm
-#
-CFLAGS = -g -DHPUX_SOURCE -DNOMAIN
-#
-# CFLAGS from 5.41 original sources
-# CFLAGS = -g -Aa -DHPUX_SOURCE
-#
-# Planetery ephemeris are built into code. To drop them and use external file,
-# use additional flag -DPAIR_SWEPH
-#
-all: $(NAME)
+LIB_NAME := astro
 
-$(NAME): $(OBJ)
-	cc $(CFLAGS) $(LIBS) -o $(NAME) $(OBJ)
+LIB_FILE_DYNAMIC = lib$(LIB_NAME).so
+LIB_FILE_STATIC = lib$(LIB_NAME).a
+
+LIB_SOURCES = astrolog.c data.c data2.c general.c io.c\
+ calc.c matrix.c charts0.c charts1.c charts2.c charts3.c\
+ intrpret.c intrpalt.c\
+ swe_call.c swejpl.c swemplan.c sweph.c\
+ swedate.c swemmoon.c swephlib.c\
+ xdata.c xgeneral.c xdevice.c xcharts0.c xcharts1.c xcharts2.c xscreen.c
+
+LIB_OBJ_STATIC = $(LIB_SOURCES:.c=_static.o)
+
+LIB_OBJ_DYNAMIC = $(LIB_SOURCES:.c=_dynamic.o)
+
+LIB_OBJ = $(LIB_OBJ_STATIC) $(LIB_OBJ_DYNAMIC)
+
+INST_HEADERS = $(wildcard *.h)
+
+LIBS = -lm
+
+CFLAGS_STATIC = -DHPUX_SOURCE -DNOMAIN
+CFLAGS_DYNAMIC = $(CFLAGS_STATIC) -fPIC
+
+DESTDIR := ~/dev/$(LIB_NAME)
+
+all: lib
+
+lib: $(LIB_FILE_DYNAMIC) $(LIB_FILE_STATIC)
+
+$(LIB_FILE_DYNAMIC): $(LIB_OBJ_DYNAMIC)
+	$(CC) $(LIBS) -shared -Wl,-soname,$(LIB_FILE_DYNAMIC) -o $(LIB_FILE_DYNAMIC) $(LIB_OBJ_DYNAMIC)
+
+$(LIB_FILE_STATIC): $(LIB_OBJ_STATIC)
+	ar rcs $(LIB_FILE_STATIC) $(LIB_OBJ_STATIC)
+
+%_dynamic.o: %.c
+	$(CC) -c $(CFLAGS_DYNAMIC) $(LIBS) -o $@ $<
+
+%_static.o: %.c
+	$(CC) -c $(CFLAGS_STATIC) $(LIBS) -o $@ $<
+
+install: all
+	mkdir -p $(DESTDIR)/lib
+	cp -f $(LIB_FILE_DYNAMIC) $(DESTDIR)/lib
+	cp -f $(LIB_FILE_STATIC) $(DESTDIR)/lib
+	mkdir -p $(DESTDIR)/include
+	cp -f $(INST_HEADERS) $(DESTDIR)/include
 
 clean:
-	rm -f $(OBJ) $(NAME)
-#
+	rm -f $(LIB_OBJ) $(LIB_FILE_DYNAMIC) $(LIB_FILE_STATIC)
 
 old: clean
 	make -f Makefile

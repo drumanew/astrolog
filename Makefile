@@ -40,5 +40,5 @@ CFLAGS = -g -DHPUX_SOURCE
 #
 astrolog:: $(OBJ)
 	cc -o $(NAME) $(OBJ) $(LIBS)
-	# strip $(NAME)
+	strip $(NAME)
 #
